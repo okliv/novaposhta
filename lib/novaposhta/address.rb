@@ -1,43 +1,45 @@
 module Novaposhta
   class Address < Base
-    def self.get_cities
-      body_of_query = make_body('Address', 'getCities')
-      post_request(body_of_query)
-    end
 
-    def self.find_city(name)
-      body_of_query = make_body('Address', 'getCities', {'FindByString' => name})
-      post_request(body_of_query)
-    end
+    class << self
+      def get_cities(find_by_string = nil)
+        if find_by_string
+          req find_by_string: find_by_string
+        else
+          req
+        end
+      end
 
-    # населенные пункты
-    def self.get_settlements
-      body_of_query = make_body('AddressGeneral', 'getSettlements', {})
-      post_request(body_of_query)
-    end
+      def find_city(name)
+        get_cities name
+      end
 
-    # области
-    def self.get_areas
-      body_of_query = make_body('Address', 'getAreas', {})
-      post_request(body_of_query)
-    end
+      # населенные пункты
+      def get_settlements opts = {}
+        req opts
+      end
 
-    # отделения и типы компании
-    def self.get_warehouses
-      body_of_query = make_body('Address', 'getWarehouses', {})
-      post_request(body_of_query)
-    end
+      # области
+      def get_areas opts = {}
+        req opts
+      end
 
-    # улицы
-    def self.get_street(city_ref)
-      body_of_query = make_body('Address', 'getStreet', {'CityRef' => city_ref})
-      post_request(body_of_query)
-    end
+      # отделения и типы компании
+      def get_warehouses opts = {}
+        req opts
+      end
 
-    # поиск улицы
-    def self.find_street(city_ref, name)
-      body_of_query = make_body('Address', 'getStreet', {'CityRef' => city_ref, 'FindByString' => name})
-      post_request(body_of_query)
+      # улицы
+      def get_street(city_ref, find_by_string = nil, opts={})
+        dopts = {}
+        dopts[:city_ref] = city_ref
+        dopts[:find_by_string] = find_by_string if find_by_string
+        req opts.merge dopts
+      end
+
+      def kiev
+        find_city('Киев').data.first
+      end
     end
   end
 end
