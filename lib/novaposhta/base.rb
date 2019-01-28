@@ -9,20 +9,14 @@ module Novaposhta
         name.split('::').last
       end
 
-      def req(opts = {})
+      def process(opts = {})
         post_request caller_locations(1, 1)[0].label, opts
       end
 
-
-      # def self.class_attr_accessor(*names)
-      #   names.each do |name|
-      #     define_singleton_method("#{name.to_s}=".to_sym) { |attr| class_variable_set("@@#{name.to_s}", attr) }
-      #     define_singleton_method(name.to_sym) { class_variable_get("@@#{name.to_s}") }
-      #   end
-      # end
+      private
 
       def post_request(called_method, options = {})
-        uri = URI(url.gsub(/\{format\}/, "#{format.to_s}"))
+        uri = URI "#{url}/#{format}/"
         request = Net::HTTP::Post.new(uri)
         format_request!(request, {
             "modelName": simple_name,
@@ -38,8 +32,6 @@ module Novaposhta
         puts "Error: #{$!}"
       end
 
-      private
-
       def format_request!(request, body)
         if format.to_sym == :json
           request.content_type = 'application/json'
@@ -52,7 +44,7 @@ module Novaposhta
 
       def format_response(response)
         if format.to_sym == :json
-          JSON.parse(JSON.parse(response.body).deep_transform_keys { |k| ActiveSupport::Inflector.underscore(k) }.to_json, object_class: OpenStruct)
+          JSON.parse JSON.parse(response.body).deep_transform_keys(&:underscore).to_json, object_class: OpenStruct
         elsif format.to_sym == :xml
           Nokogiri::XML(response.body)
         end

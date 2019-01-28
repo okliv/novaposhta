@@ -4,9 +4,9 @@ module Novaposhta
     class << self
       def get_cities(find_by_string = nil)
         if find_by_string
-          req find_by_string: find_by_string
+          process find_by_string: find_by_string
         else
-          req
+          process
         end
       end
 
@@ -15,18 +15,18 @@ module Novaposhta
       end
 
       # населенные пункты
-      def get_settlements opts = {}
-        req opts
+      def get_settlements(opts = {})
+        process opts
       end
 
       # области
-      def get_areas opts = {}
-        req opts
+      def get_areas(opts = {})
+        process opts
       end
 
       # отделения и типы компании
-      def get_warehouses opts = {}
-        req opts
+      def get_warehouses(opts = {})
+        process opts
       end
 
       # улицы
@@ -34,12 +34,21 @@ module Novaposhta
         dopts = {}
         dopts[:city_ref] = city_ref
         dopts[:find_by_string] = find_by_string if find_by_string
-        req opts.merge dopts
+        process opts.merge dopts
       end
 
       def kiev
-        find_city('Киев').data.first
+        @kiev ||= find_city('Киев').data.first
       end
+
+      def kiev_warehouses
+        @kiev_warehouses ||= get_warehouses(city_ref: kiev.ref).data
+      end
+
+      def kiev_warehouse(number)
+        kiev_warehouses.find{|w| w.number==number.to_s}
+      end
+
     end
   end
 end
